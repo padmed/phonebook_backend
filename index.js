@@ -43,5 +43,13 @@ app.get("/api/persons/:id", (request, response) => {
   personToSend ? response.json(personToSend) : response.status(404).end();
 });
 
+app.delete("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+  persons = persons.filter((x) => x.id !== id);
+
+  //sends 204 status code either if the request was valid or not
+  response.status(204).end();
+});
+
 PORT = 3001;
 app.listen(PORT);
