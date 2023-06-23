@@ -62,6 +62,13 @@ app.post("/api/persons", (request, response) => {
     });
   }
 
+  //If the name exists in the persons object, this throws an error
+  if (persons.find((x) => x.name === body.name)) {
+    return response
+      .status(400)
+      .json({ error: "The name already exists in the phonebook" });
+  }
+
   const personToAdd = {
     name: body.name,
     number: body.number,
