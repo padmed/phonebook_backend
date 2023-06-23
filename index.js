@@ -35,5 +35,13 @@ app.get("/info", (request, response) => {
   );
 });
 
+app.get("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const personToSend = persons.find((x) => x.id === id);
+
+  //If there's no personToSend then 404 error
+  personToSend ? response.json(personToSend) : response.status(404).end();
+});
+
 PORT = 3001;
 app.listen(PORT);
