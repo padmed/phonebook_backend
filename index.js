@@ -1,7 +1,7 @@
 const express = require("express");
-const app = express();
-app.use(express.json());
+const morgan = require("morgan");
 
+const app = express();
 let persons = [
   {
     id: 1,
@@ -25,10 +25,29 @@ let persons = [
   },
 ];
 
+//Token for logging POST request contents
+morgan.token("content", (req, res) => {
+  return JSON.stringify({ name: req.body.name, number: req.body.number });
+});
+
+//Parses JSON
+app.use(express.json());
+
+//Using "tiny" predefined logging format for all request methods, except POST method
+app.use(
+  morgan("tiny", {
+    skip: function (request, response) {
+      return request.method === "POST";
+    },
+  })
+);
+
+//Handles GET request
 app.get("/api/persons", (request, response) => {
   response.json(persons);
 });
 
+//Handles .../info GET request
 app.get("/info", (request, response) => {
   response.send(
     `Phonebook has info for ${persons.length} persons 
@@ -37,6 +56,7 @@ app.get("/info", (request, response) => {
   );
 });
 
+//Handles a single data GET request
 app.get("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   const personToSend = persons.find((x) => x.id === id);
@@ -45,6 +65,7 @@ app.get("/api/persons/:id", (request, response) => {
   personToSend ? response.json(personToSend) : response.status(404).end();
 });
 
+//Handles delete request of a single data
 app.delete("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   persons = persons.filter((x) => x.id !== id);
@@ -53,6 +74,14 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
+//Formats POST request logging
+app.use(
+  morgan(
+    ":method :url :status :res[content-length] - :response-time ms :content"
+  )
+);
+
+//Posts data
 app.post("/api/persons", (request, response) => {
   const body = request.body;
 
