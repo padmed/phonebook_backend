@@ -1,4 +1,4 @@
-POST http://localhost:3001/api/persons
+POST https://phonebookapp-fso.fly.dev/api/persons
 Content-Type: application/json
 
 {
