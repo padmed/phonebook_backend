@@ -54,6 +54,9 @@ app.use(
 //Allows cross-origin browsing
 app.use(cors());
 
+//Declare frontend
+app.use(express.static("build"));
+
 //Handles GET request
 app.get("/api/persons", (request, response) => {
   response.json(persons);
