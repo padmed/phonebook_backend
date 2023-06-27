@@ -1,5 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
+const cors = require("cors");
 
 const app = express();
 let persons = [
@@ -25,6 +26,14 @@ let persons = [
   },
 ];
 
+const unknownEndpoint = (req, res) => {
+  res.status(404).send(
+    JSON.stringify({
+      error: "Unknown endpoint",
+    })
+  );
+};
+
 //Token for logging POST request contents
 morgan.token("content", (req, res) => {
   return JSON.stringify({ name: req.body.name, number: req.body.number });
@@ -41,6 +50,9 @@ app.use(
     },
   })
 );
+
+//Allows cross-origin browsing
+app.use(cors());
 
 //Handles GET request
 app.get("/api/persons", (request, response) => {
@@ -108,5 +120,6 @@ app.post("/api/persons", (request, response) => {
   response.json(personToAdd);
 });
 
-PORT = 3001;
+app.use(unknownEndpoint);
+PORT = process.env.PORT || 3001;
 app.listen(PORT);
