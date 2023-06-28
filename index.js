@@ -119,6 +119,7 @@ app.post("/api/persons", (request, response) => {
     id: Math.floor(Math.random() * 999999999999999999),
   };
 
+  debugger;
   persons = [...persons, personToAdd];
   response.json(personToAdd);
 });
