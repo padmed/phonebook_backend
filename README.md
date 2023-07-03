@@ -1,1 +1,1 @@
-Backend is hosted on: https://phonebookapp-fso.fly.dev/info
+App is hosted on: https://phonebookapp-fso.fly.dev/

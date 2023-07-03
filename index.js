@@ -5,28 +5,6 @@ const cors = require("cors");
 const PersonNumber = require("./models/PersonNumber");
 
 const app = express();
-let persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
 
 const unknownEndpoint = (req, res) => {
   res.status(404).send(
@@ -110,22 +88,21 @@ app.post("/api/persons", (request, response) => {
     });
   }
 
-  //If the name exists in the persons object, this throws an error
-  if (persons.find((x) => x.name === body.name)) {
-    return response
-      .status(400)
-      .json({ error: "The name already exists in the phonebook" });
-  }
+  // //If the name exists in the persons object, this throws an error
+  // if (persons.find((x) => x.name === body.name)) {
+  //   return response
+  //     .status(400)
+  //     .json({ error: "The name already exists in the phonebook" });
+  // }
 
-  const personToAdd = {
+  const personToAdd = new PersonNumber({
     name: body.name,
     number: body.number,
-    id: Math.floor(Math.random() * 999999999999999999),
-  };
+  });
 
-  debugger;
-  persons = [...persons, personToAdd];
-  response.json(personToAdd);
+  personToAdd.save().then((result) => {
+    response.send(result);
+  });
 });
 
 app.use(unknownEndpoint);
