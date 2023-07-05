@@ -6,30 +6,33 @@ const PersonNumber = require("./models/PersonNumber");
 
 const app = express();
 
-const unknownEndpoint = (req, res) => {
-  res.status(404).send(
+const unknownEndpoint = (request, response) => {
+  response.status(404).send(
     JSON.stringify({
       error: "Unknown endpoint",
     })
   );
 };
 
-const errorHandler = (error, req, res, next) => {
+const errorHandler = (error, request, response, next) => {
   console.log(error.message);
 
   if (error.name === "CastError") {
-    return res.status(400).json({
+    return response.status(400).json({
       error: "Malformatted ID",
     });
   }
-  return res.status(error.status).json({
+  return response.status(error.status).json({
     error: error.message,
   });
 };
 
 //Token for logging POST request contents
-morgan.token("content", (req, res) => {
-  return JSON.stringify({ name: req.body.name, number: req.body.number });
+morgan.token("content", (request, response) => {
+  return JSON.stringify({
+    name: request.body.name,
+    number: request.body.number,
+  });
 });
 
 //Parses JSON
