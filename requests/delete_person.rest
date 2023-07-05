@@ -1,1 +1,1 @@
-DELETE https://phonebookapp-fso.fly.dev/api/persons/3
+DELETE http://localhost:3001/api/persons/64a2e1b0b4ede565bbcd7fda

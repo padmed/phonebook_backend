@@ -64,11 +64,14 @@ app.get("/api/persons/:id", (request, response) => {
 
 //Handles delete request of a single data
 app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  persons = persons.filter((x) => x.id !== id);
-
-  //sends 204 status code either if the request was valid or not
-  response.status(204).end();
+  const id = request.params.id;
+  PersonNumber.findByIdAndRemove(id)
+    .then(() => {
+      response.status(204).end();
+    })
+    .catch((e) => {
+      console.log(e.message);
+    });
 });
 
 //Formats POST request logging
