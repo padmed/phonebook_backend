@@ -71,12 +71,25 @@ app.get("/info", (request, response) => {
 });
 
 //Handles a single data GET request
-app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const personToSend = persons.find((x) => x.id === id);
+app.get("/api/persons/:id", (request, response, next) => {
+  const id = request.params.id;
 
-  //If there's no personToSend then 404 error
-  personToSend ? response.json(personToSend) : response.status(404).end();
+  PersonNumber.findById(id)
+    .then((result) => {
+      if (result) {
+        response.json(result);
+      }
+      //If data doesn't exist, new error obj is created and passed to error handler middleware
+      else {
+        const error = new Error("Person data doesn't exist");
+        error.status = 404;
+        next(error);
+      }
+    })
+    //If mongodb returns an error, it is passed to error handler middleware
+    .catch((e) => {
+      next(e);
+    });
 });
 
 //Handles delete request of a single data
@@ -119,6 +132,34 @@ app.post("/api/persons", (request, response, next) => {
   personToAdd.save().then((result) => {
     response.send(result);
   });
+});
+
+//updates data
+app.put("/api/persons/:id", (request, response, next) => {
+  const body = request.body;
+  const id = request.params.id;
+
+  //Should be regular JS obj, not a mongo model
+  const updatedPerson = {
+    name: body.name,
+    number: body.number,
+  };
+
+  //Finds matching mongodb data, updates it by newly created object's properties.
+  //Third parameter {new: true} makes the server immediately return udpated object
+  PersonNumber.findByIdAndUpdate(id, updatedPerson, { new: true })
+    .then((result) => {
+      if (result) {
+        response.json(result);
+      } else {
+        const error = new Error("Person doesnt exist in the database");
+        error.status = 404;
+        next(error);
+      }
+    })
+    .catch((e) => {
+      next(e);
+    });
 });
 
 app.use(unknownEndpoint);
