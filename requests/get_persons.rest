@@ -1,1 +1,1 @@
-GET https://phonebookapp-fso.fly.dev/api/persons
+GET http://localhost:3001/api/persons

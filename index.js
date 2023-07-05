@@ -14,6 +14,19 @@ const unknownEndpoint = (req, res) => {
   );
 };
 
+const errorHandler = (error, req, res, next) => {
+  console.log(error.message);
+
+  if (error.name === "CastError") {
+    return res.status(400).json({
+      error: "Malformatted ID",
+    });
+  }
+  return res.status(error.status).json({
+    error: error.message,
+  });
+};
+
 //Token for logging POST request contents
 morgan.token("content", (req, res) => {
   return JSON.stringify({ name: req.body.name, number: req.body.number });
@@ -38,10 +51,14 @@ app.use(cors());
 app.use(express.static("build"));
 
 //Handles GET request
-app.get("/api/persons", (request, response) => {
-  PersonNumber.find({}).then((result) => {
-    response.json(result);
-  });
+app.get("/api/persons", (request, response, next) => {
+  PersonNumber.find({})
+    .then((result) => {
+      response.json(result);
+    })
+    .catch((e) => {
+      next(e);
+    });
 });
 
 //Handles .../info GET request
@@ -63,14 +80,14 @@ app.get("/api/persons/:id", (request, response) => {
 });
 
 //Handles delete request of a single data
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
   const id = request.params.id;
   PersonNumber.findByIdAndRemove(id)
     .then(() => {
       response.status(204).end();
     })
     .catch((e) => {
-      console.log(e.message);
+      next(e);
     });
 });
 
@@ -82,21 +99,17 @@ app.use(
 );
 
 //Posts data
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body;
 
+  //If person data is missing, new error obj is created and passed to error handler middleware
   if (!body.number || !body.name) {
-    return response.status(400).json({
-      error: "Person data missing",
-    });
+    const error = new Error("Person data is missing");
+    error.status = 404;
+    //After error handler handles the error - we close end the response with .end()
+    //so the program stops excecuting and malformatted data isn't saved on the server
+    next(error).end();
   }
-
-  // //If the name exists in the persons object, this throws an error
-  // if (persons.find((x) => x.name === body.name)) {
-  //   return response
-  //     .status(400)
-  //     .json({ error: "The name already exists in the phonebook" });
-  // }
 
   const personToAdd = new PersonNumber({
     name: body.name,
@@ -109,5 +122,6 @@ app.post("/api/persons", (request, response) => {
 });
 
 app.use(unknownEndpoint);
+app.use(errorHandler);
 PORT = process.env.PORT || 3001;
 app.listen(PORT);
