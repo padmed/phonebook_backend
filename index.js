@@ -15,12 +15,19 @@ const unknownEndpoint = (request, response) => {
 };
 
 const errorHandler = (error, request, response, next) => {
-  console.log(error.message);
+  console.log("--------------------------");
+  console.log(`Error name: ${error.name}`);
+  console.log(`Error message: ${error.message}`);
+  console.log("--------------------------");
 
   if (error.name === "CastError") {
     return response.status(400).json({
       error: "Malformatted ID",
     });
+  } else if (error.name === "ValidationError") {
+    return response
+      .status(422)
+      .json({ error: error.name, errorMessage: error.message });
   }
   return response.status(error.status).json({
     error: error.message,
@@ -121,7 +128,7 @@ app.post("/api/persons", (request, response, next) => {
   //If person data is missing, new error obj is created and passed to error handler middleware
   if (!body.number || !body.name) {
     const error = new Error("Person data is missing");
-    error.status = 404;
+    error.status = 400;
     //After error handler handles the error - we close end the response with .end()
     //so the program stops excecuting and malformatted data isn't saved on the server
     next(error).end();
@@ -132,25 +139,29 @@ app.post("/api/persons", (request, response, next) => {
     number: body.number,
   });
 
-  personToAdd.save().then((result) => {
-    response.send(result);
-  });
+  personToAdd
+    .save()
+    .then((result) => {
+      response.send(result);
+    })
+    .catch((e) => {
+      next(e);
+    });
 });
 
 //updates data
 app.put("/api/persons/:id", (request, response, next) => {
-  const body = request.body;
   const id = request.params.id;
-
-  //Should be regular JS obj, not a mongo model
-  const updatedPerson = {
-    name: body.name,
-    number: body.number,
-  };
+  const { name, number } = request.body;
 
   //Finds matching mongodb data, updates it by newly created object's properties.
   //Third parameter {new: true} makes the server immediately return udpated object
-  PersonNumber.findByIdAndUpdate(id, updatedPerson, { new: true })
+  //Context: 'query', makes mongoose to run validators on query level operations
+  PersonNumber.findByIdAndUpdate(
+    id,
+    { name, number },
+    { new: true, context: "query", runValidators: "true" }
+  )
     .then((result) => {
       if (result) {
         response.json(result);
