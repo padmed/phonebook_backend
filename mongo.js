@@ -1,9 +1,10 @@
-const mongoose = require("mongoose");
+/* eslint-disable no-console */
+const mongoose = require('mongoose');
 
-//If the parameters are not provided, message is displayed and the program execution stops
+// If the parameters are not provided, message is displayed and the program execution stops
 if (process.argv.length < 3) {
   console.log(
-    "*********\n\nTo log out all numbers type a Password \n \nTo save a number type in the following format: Password, Name, Number \n \n********* "
+    '*********\n\nTo log out all numbers type a Password \n \nTo save a number type in the following format: Password, Name, Number \n \n********* ',
   );
   process.exit(1);
 }
@@ -14,14 +15,15 @@ const phoneNumberSchema = mongoose.Schema({
   name: String,
   number: String,
 });
-const phoneNumber = mongoose.model("phoneNumber", phoneNumberSchema);
+const phoneNumber = mongoose.model('phoneNumber', phoneNumberSchema);
 
 mongoose.connect(URL);
-//If user provides more then 3 parameters, it means that he wants to save the new number
+// If user provides more then 3 parameters, it means that he wants to save the new number
 if (process.argv.length > 3) {
   const name = process.argv[3];
   const number = process.argv[4];
 
+  // eslint-disable-next-line new-cap
   const newPhoneNumber = new phoneNumber({
     name,
     number,
@@ -33,10 +35,12 @@ if (process.argv.length > 3) {
   });
 }
 
-//If there are exactly 3 params, it is assumed that the third param. is the password and all the data gets displayed
+// eslint-disable-next-line max-len
+// If there are exactly 3 params, it is assumed that the third param. is the password and all the data gets displayed
 if (process.argv.length === 3) {
-  console.log("Phonebook: ");
+  console.log('Phonebook: ');
   phoneNumber.find({}).then((result) => {
+    // eslint-disable-next-line no-shadow
     result.forEach((phoneNumber) => {
       console.log(phoneNumber.name, phoneNumber.number);
     });

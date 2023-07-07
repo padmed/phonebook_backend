@@ -1,3 +1,5 @@
+/* eslint-disable func-names */
+/* eslint-disable no-console */
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
@@ -166,7 +168,7 @@ app.put('/api/persons/:id', (request, response, next) => {
   PersonNumber.findByIdAndUpdate(
     id,
     { name, number },
-    { new: true, context: 'query', runValidators: 'true' }
+    { new: true, context: 'query', runValidators: 'true' },
   )
     .then((result) => {
       if (result) {
